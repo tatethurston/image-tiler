@@ -8,9 +8,16 @@ The create_tiles executable preprocesses the image and creates a TileSet for eac
 Example image: [hubble](http://imgsrc.hubblesite.org/hu/db/images/hs-2015-02-a-full_jpg.jpg)
 
 ### Getting Started
+
+1. Install Dependencies
 ```
 pip install -r requirements.txt
 cd static && npm install
+```
+
+3. Launch the Flask server
+```
+python3 server.py
 ```
 
 ### Example Usage

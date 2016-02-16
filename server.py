@@ -5,7 +5,7 @@ from utilities import hash_image
 import os
 
 app = Flask(__name__)
-app.debug = True
+# app.debug = True
 
 @app.route('/')
 def index():
