@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+
+from PIL import Image
+from utilities import hash_image
+import os
+import sys
+
+#IN = 'images/in'
+OUT = 'images/out'
+"""str: The path to the output folder"""
+MAX_SIZE = 500
+"""int: The maximum pixel width and height for an image"""
+
+
+def resize(image, max_size):
+    """
+    Rezise an image to fit within a supplied maximum
+
+    Args:
+        image (PIL Image): The PIL Image to resize
+        max_size (int): The maxiumum pixel width and height
+
+    Returns:
+        PIL Image
+    """
+    width, height = image.size
+    if width > max_size or height > max_size:
+        # Scale width and height
+        if width > height:
+            height = int( (max_size / width) * height)
+            width = max_size
+        else:
+            width = int( (max_size / height) * width)
+            height = max_size
+        image = image.resize( (width, height) )
+    return image
+
+
+def load_image(file):
+    """
+    Creates a PIL image from a filepath. Logs errors to STDOUT
+
+    Args:
+        file (str): The filepath to the image
+
+    Returns:
+        PIL Image if successful or None if unsuccesful
+    """
+    try:
+        image = Image.open(file)
+    except Exception as e:
+        image = None
+        print(e)
+
+    return image
+
+
+def generate_zoom_tiles (image, filename, zoom_levels):
+    """
+    Creates zoom level and accompanying tiles for an image and saves
+    them under the images/out directory
+
+    Args:
+        image (PIL Image): The PIL Image to tile
+        filename (str): The filename (including extension) to use
+            for the output file
+        zoom_levels (int): The number of zoom levels to generate 
+
+    Returns:
+        None
+    """
+    for level in range(0, zoom_levels + 1): 
+        num_rows = pow(2, level)
+        num_cols = pow(2, level)
+        tile_image(image, filename, num_rows, num_cols, level)
+
+
+def tile_image(image, filename, num_rows, num_cols, zoom):
+    """
+    Splits an image into tiles and saves them under the images/out
+    directory. Logs created files to STDOUT.
+
+    Args:
+        image (PIL Image): The PIL Image to tile
+        filename (str): The filename (including extension) to use
+            for the output file
+        num_rows (int): The number of tile rows
+        num_cols (int): The number of tile columns
+        zoom (int): The current zoom level
+
+    Returns:
+        None
+    """
+    # output_base, file_extension = os.path.splitext(filename)
+    file_width, file_height = image.size
+
+    tile_width = file_width // num_rows
+    tile_height = file_height // num_cols
+
+    top = 0
+    for row in range(num_rows):
+        left = 0
+        for col in range(num_cols):
+            # crop signature is (left, top, right, bottom)
+            section = (left, top, left + tile_width, top + tile_height)
+            tile = resize( image.crop(section), MAX_SIZE )
+
+            tile_name = hash_image.hash(filename, zoom, row, col)
+            tile_path = os.path.join(OUT, tile_name)
+            tile.save(tile_path)
+            print('Created:', tile_path)
+            
+            left += tile_width
+        top += tile_height
+
+
+def main(filename, zoom_levels=4):
+    """
+    Generates a series tile sets for an image at varying zoom levels
+
+    Args:
+        filename (str): The path to an image file
+        zoom_levels (Optional[int or string]): The number of of zoom
+            levels to generate
+
+    Returns:
+        None
+    """
+    if not os.path.exists(OUT):
+        os.makedirs(OUT)
+        
+    image = load_image(filename)
+    levels = int(zoom_levels)
+
+    if image != None:
+        output_base = os.path.basename(filename)
+        generate_zoom_tiles(image, output_base, levels)
+
+
+if __name__ == '__main__':
+    main(*sys.argv[1:])
