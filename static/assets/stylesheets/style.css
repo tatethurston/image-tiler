@@ -1,0 +1,26 @@
+.image-viewer {
+  margin: 0 auto;
+  width: 500px;
+}
+
+.image-viewer h1{
+  text-align: center;
+}
+
+.image-view {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.zoom-buttons {
+  position: absolute;
+  bottom: .5em;
+  right: .5em;
+}
+
+.zoom-buttons button {
+  display: block;
+  font-weight: bold;
+  width: 2em;
+}
